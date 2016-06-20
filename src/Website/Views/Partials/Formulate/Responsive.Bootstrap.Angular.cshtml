@@ -1,0 +1,134 @@
+﻿@using formulate.app.Layouts.Kinds.Basic
+@using formulate.app.Validations.Kinds.Regex
+@using formulate.app.Validations.Kinds.Mandatory
+@using formulate.app.Forms.Fields.DropDown
+@using formulate.core.Extensions
+@using formulate.core.Types
+@model formulate.core.Models.FormViewModel
+@{
+
+    // Variables.
+    var fields = Model.FormDefinition.Fields;
+    var layout = Model.LayoutDefinition.Configuration as LayoutBasicConfiguration;
+
+
+    // This view can only render basic layouts.
+    if (layout == null)
+    {
+        return;
+    }
+
+
+    // A function that returns a validation configuration.
+    var getValidationConfig = new Func<ValidationDefinition, object>(x =>
+    {
+        if (x.ValidationType == typeof(ValidationRegex))
+        {
+            var config = x.Configuration as ValidationRegexConfiguration;
+            return new
+            {
+                message = config.Message,
+                pattern = config.Pattern
+            };
+        }
+        else if (x.ValidationType == typeof(ValidationMandatory))
+        {
+            var config = x.Configuration as ValidationMandatoryConfiguration;
+            return new
+            {
+                message = config.Message
+            };
+        }
+        return new { };
+    });
+
+
+    // A function that returns a field configuration.
+    var getFieldConfig = new Func<FieldDefinition, object>(x =>
+    {
+        if (x.FieldType == typeof(DropDownField))
+        {
+            var config = x.Configuration as DropDownConfiguration;
+            return new
+            {
+                items = config.Items.Select(y => new
+                {
+                    value = y.Value,
+                    label = y.Label,
+                    selected = y.Selected
+                }).ToArray()
+            };
+        }
+        return new { };
+    });
+
+
+    // Structure fields as an anonymous object suitable for serialization to JSON.
+    var fieldsData = fields.Select(x => new
+    {
+        // The alias can be used to attach custom styles.
+        alias = x.Alias,
+        // The label can be used to instruct the user what data to enter.
+        label = x.Label ?? x.Name,
+        // The ID can be submitted to the server to uniquely identify the field.
+        id = x.Id.ToString("N"),
+        // This field type (e.g., "text", "checkbox") can be used to figure out how to render a field.
+        fieldType = x.FieldType.Name.ConvertFieldTypeToAngularType(),
+        // The validations can be used to validate that the data is of the expected format.
+        validations = x.Validations.Select(y => new
+        {
+            id = y.Id.ToString("N"),
+            alias = y.Alias,
+            validationType = y.ValidationType.Name.ConvertValidationTypeToAngularType(),
+            // The validation configuration stores parameters particular to a validation instance (e.g., a regex pattern).
+            configuration = getValidationConfig(y)
+        }).ToArray(),
+        // The field configuration stores parameters particular to a field (e.g., a list of items).
+        configuration = getFieldConfig(x)
+    }).ToArray();
+
+
+    // Structure layout as an anonymous object suitable for serialization to JSON.
+    var rowsData = layout.Rows.Select(x => new
+    {
+        cells = x.Cells.Select(y => new
+        {
+            columns = y.ColumnSpan,
+            fields = y.Fields.Select(z => new
+            {
+                id = z.FieldId.ToString("N")
+            }).ToArray()
+        }).ToArray()
+    }).ToArray();
+
+
+    // Convert to a JSON string that can be consumed by Angular.
+    var angularModel = Json.Encode(new
+    {
+        data = new
+        {
+            // The name of the form can be use for analytics.
+            name = Model.FormDefinition.Name,
+            // The form alias can be used for custom styles.
+            alias = Model.FormDefinition.Alias,
+            // The random ID can be used to uniquely identify the form on the page.
+            // Note that this random ID is regenerated on each page render.
+            randomId = Guid.NewGuid().ToString("N"),
+            // The fields in this form.
+            fields = fieldsData,
+            // The rows that define the form layout.
+            rows = rowsData,
+            payload = new
+            {
+                FormId = Model.FormDefinition.FormId.ToString("N")
+            },
+            url = "/umbraco/formulate/submissions/submit"
+        }
+    });
+
+}
+
+<formulate-json-source source="@angularModel">
+    <formulate-responsive-form form-data="::ctrl.data">
+    </formulate-responsive-form>
+</formulate-json-source>

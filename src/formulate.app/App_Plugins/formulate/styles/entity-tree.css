@@ -1,0 +1,21 @@
+ul.formulate-entity-tree,
+ul.formulate-entity-tree ul {
+    list-style-type: none;
+}
+
+ul.formulate-entity-tree li {
+    position: relative;
+}
+
+ul.formulate-entity-tree .child-toggle {
+    position: absolute;
+    left: -15px;
+}
+
+ul.formulate-entity-tree .child-toggle:hover {
+    cursor: pointer;
+}
+
+ul.formulate-entity-tree .entity-icon.selected {
+    color: #2e8aea;
+}

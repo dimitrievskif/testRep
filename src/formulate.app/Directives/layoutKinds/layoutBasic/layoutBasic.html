@@ -1,0 +1,63 @@
+﻿<div>
+    <div ui-sortable="rowsSortableOptions" ng-model="rows">
+        <div ng-repeat="(rowIndex, row) in rows" class="row">
+            <div ng-repeat="cell in row.cells" ng-class="getCellClass(row)">
+
+                <!-- Show full fields when editing fields. -->
+                <div ng-if="!editRows" class="formulate-cell" ui-sortable="fieldSortableOptions" ng-model="cell.fields">
+                    <div ng-if="!editRows">
+                        <div ng-repeat="field in cell.fields" class="formulate-cell-field">
+                            {{field.name}}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Show field summaries when editing rows. -->
+                <div ng-if="editRows" class="formulate-cell editing-rows">
+                    <span ng-repeat="field in cell.fields" class="formulate-cell-field">
+                        <span class="formulate-cell-field-name">{{field.name}}</span>
+                    </span>
+                    <div>
+                        <button type="button" ng-click="deleteRow(rowIndex)" ng-if="$index === 0" class="btn btn-danger">Delete Row</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div>
+
+        <!-- Controls. -->
+        <label>
+            <input
+                type="checkbox"
+                ng-model="editRows"
+                id="editRows" />
+            Edit rows?
+        </label>
+        <button type="button" class="btn btn-default" ng-click="pickForm()">Pick Form</button>
+
+        <!-- Add row button. -->
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                Add Row
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li>
+                    <a href ng-click="addRow(1)">1 Column</a>
+                </li>
+                <li>
+                    <a href ng-click="addRow(2)">2 Columns</a>
+                </li>
+                <li>
+                    <a href ng-click="addRow(3)">3 Columns</a>
+                </li>
+                <li>
+                    <a href ng-click="addRow(4)">4 Columns</a>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+</div>

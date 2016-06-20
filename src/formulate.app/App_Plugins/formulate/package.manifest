@@ -1,0 +1,22 @@
+{
+    "javascript": [
+        "~/App_Plugins/formulate/formulate.js"
+    ],
+    "css": [
+        "~/App_Plugins/formulate/styles/formulate-icomoon.css",
+        "~/App_Plugins/formulate/styles/form-designer.css",
+        "~/App_Plugins/formulate/styles/layout-designer.css",
+        "~/App_Plugins/formulate/styles/configured-form-designer.css",
+        "~/App_Plugins/formulate/styles/entity-tree.css"
+    ],
+    "propertyEditors": [
+        {
+            "alias": "Formulate.ConfiguredFormPicker",
+            "name": "Formulate Configured Form Picker",
+            "editor": {
+                "view": "~/App_Plugins/formulate/editors/configured-form-picker.html",
+                "valueType": "JSON"
+            }
+        }
+    ]
+}
