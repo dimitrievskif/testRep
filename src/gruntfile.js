@@ -202,6 +202,32 @@ module.exports = function(grunt) {
                 }
             }
         },
+        nugetrestore: {
+		restore: {
+			src: 'Website/packages.config',
+			dest: 'packages/'
+		}
+	},
+	assemblyinfo: {
+            options: {
+                files: ['Formulate.sln'],
+                info: {
+                    version: getVersion(), 
+                    fileVersion: getVersion(),
+                    company: 'Planet Express',
+                    copyright: 'Copyright 3002 (c) Planet Express'
+                    
+                }
+            }
+        },
+	msbuild: {
+            src: ['Formulate.sln'],
+            options: {
+                projectConfiguration: 'Release',
+                targets: ['Clean', 'Rebuild'],
+                stdout: true
+            }
+        },
         nuget_install: {
             file: "Formulate.sln"
         },
@@ -312,6 +338,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks("grunt-msbuild");
     grunt.loadNpmTasks("grunt-ng-annotate");
     grunt.loadNpmTasks("grunt-jsdoc");
+    grunt.loadNpmTasks('grunt-nuget');
+    grunt.loadNpmTasks('grunt-dotnet-assembly-info');
 
     // Register Grunt tasks.
     grunt.registerTask("default",
@@ -331,7 +359,7 @@ module.exports = function(grunt) {
     grunt.registerTask("package-full",
         // The "package-full" task is used to build the Visual Studio
         // solution and then create the installer package for Formulate.
-        ["clean:before", "nuget_install", "configure:msbuild", "msbuild:main", "htmlConvert",
+        ["nugetrestore", "assemblyinfo", "msbuild", "clean:before", "nuget_install", "configure:msbuild", "msbuild:main", "htmlConvert",
         "browserify:default", "ngAnnotate:main", "configure:copy:package",
         "copy:package", "umbracoPackage:main", "clean:after"]);
 
